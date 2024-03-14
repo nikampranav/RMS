@@ -1,0 +1,102 @@
+<!--
+* 
+* @ Name    :   RMS_TrainDetailCmp
+* @ Purpose :   This is a component for displaying the train information
+* @ Author  :   Nikam Pranav
+*
+*   Date            |  Developer Name               |  Version      |  Changes
+* ======================================================================================================
+*   23-01-2024      |  pranav.nikam@absyz.com	    |  1.0          |  Initial Version
+*   16-02-2024      |  pranav.nikam@absyz.com       |  1.1          |  optamized the code in all ways.
+*
+-->
+
+<template>
+    <div class="slds-backdrop" if:true={showModalBackdrop}></div>
+    <template for:each={journey} for:item="journeyItem">
+        <lightning-card key={journeyItem.Id} class="main-card" >
+            <div class="inner-container">
+        <div style="border: 2px solid #c8c8ce;">
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <div class="header">
+                        <h1 slot="title" style="display: flex;align-items: center;gap:10px;">
+                            <lightning-icon 
+                        icon-name="custom:custom36"  
+                        size="large"
+                        class="slds-m-left_small" 
+                        >
+                    </lightning-icon>
+                            <div class="slds-text-heading_medium"><strong>{journeyItem.RMS_Train__r.Name}</strong></div>
+                        </h1>
+                        <h2 slot="title" style="display: flex;align-items: center;gap:10px;">
+                            <div class="slds-text-heading_medium"><strong>Runs On: {journeyItem.RMS_Train__r.RMS_Weekday__c}</strong></div>
+                        </h2>
+                        <lightning-button onclick={navigateSchedulePage} class="slds-m-around_large" label="Train Schedule"></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <!-- It’s iterating over each journeyItem in journey -->
+            <div class="train-info" key={journeyItem.Id}>
+                <div class="style= border-bottom: 1px solid #d4d2d2cb;"></div>
+
+                <!-- <div class="slds-box" style="background-color: #ffffff; border: 0px solid #8a8686cb; "> -->
+                    <div class="slds-text-heading_medium">
+                        <div class="schedule" style="display: flex; color: blue;">
+                            <div class="time-place">{journeyItem.RMS_DepartureTimeFrom__c} | {journeyItem.RMS_From__r.Name} | {journeyItem.RMS_Date__c}</div>
+                            <!-- <div class="duration">{journeyItem.duration}</div> -->
+                            <div class="time-place">{journeyItem.RMS_ArrivalTimeTo__c} | {journeyItem.RMS_To__r.Name} | {journeyItem.RMS_Date__c}</div>
+                        </div>
+                    </div>
+                    <div class="style= border-bottom: 1px solid #d4d2d2cb;"></div>
+                <!-- </div> -->
+            </div>
+                 <br>   
+
+                
+
+    <div class="slds-box slds-box_small" style="background-color: #f2f2f2b7; border: 1px solid #d9d2d2;">
+        
+     <lightning-tabset active-tab-value={activeTab}>
+        <template for:each={rms_coaches} for:item="coach">
+            <lightning-tab key={coach.int_coachName} onactive={handleTabChange} label={coach.int_coachName} value={coach.int_coachName}>
+                <div style="background-color: #f2f2f2b7; border: 0px solid #f2f2f2b7; padding-bottom: 20px; margin-top: 10px; margin-bottom: 10px;">
+                    <div class="date-block-container">
+
+                        <template for:each={seatInfo} for:item="seat">  
+                            <div key={seat.date} class="date-block" onclick={handleBlockClick}>
+                                <div class="date">{seat.date}</div>
+                                <div class="capacity" style="color: #e81c1c;">{seat.capacity}</div>
+                            </div>
+                        </template> 
+
+                        
+                        
+                        
+   
+
+                    </div>
+                </div>
+             
+                <div  style="background-color: #f2f2f2b7;">
+                <div class="button-container slds-text-align_right">
+                <lightning-button label="Other dates"  onclick={openNewRecord} class="slds-m-left_x-small">
+                </lightning-button>
+                <lightning-button label="Book Now" variant="brand" onclick={handleConfirmClick} class="slds-m-left_x-small">
+                </lightning-button>
+            </div>
+            </div>
+
+                    </lightning-tab>
+                </template>
+            </lightning-tabset>
+    </div>
+        </div>
+            </div>
+    </lightning-card>
+</template>
+</template>

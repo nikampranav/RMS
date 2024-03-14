@@ -1,0 +1,12 @@
+<template>
+    <lightning-card>
+    <lightning-input type="text" label="From" placeholder="Place" value={searchValue} onchange={handleSearch}></lightning-input>
+    <template if:true={stations}>
+        <ul>
+            <template for:each={stations} for:item="station">
+                <li key={station}>{station}</li>
+            </template>
+        </ul>
+    </template>
+</lightning-card>
+</template>

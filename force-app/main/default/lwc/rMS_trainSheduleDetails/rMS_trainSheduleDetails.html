@@ -1,0 +1,101 @@
+<!--
+* 
+* @ Name    :   RMS_DisplayTrainDetails
+* @ Purpose :   This is a component for displaying the individual Train Schedule Details
+* @ Author  :   Navaneeth S Hari
+*
+*   Date            |  Developer Name               |  Version      |  Changes
+* ======================================================================================================
+*   23-01-2024      |  navaneeth.hari@absyz.com     |  1.0          |  Initial Version
+*
+-->
+
+
+<template>
+    <!-- <lightning-spinner variant="brand" size="large" alternative-text="Loading" if:true={isLoadingHeader}></lightning-spinner> -->
+    <lightning-card>
+        <lightning-spinner variant="brand" size="small" alternative-text="Loading" if:true={isLoadingHeader}></lightning-spinner>
+        <div class="slds-grid slds-wrap">
+            <div class="slds-col slds-size_1-of-6 slds-text-align_center">
+                <span>
+                    <h4><b>Train Number</b></h4>
+                    <p><a onclick={viewTrainRecord}>{str_TrainNumber}</a></p>
+                </span>
+                
+            </div>
+            <div class="sdls-col slds-size_1-of-6 slds-text-align_center">
+                <span>
+                    
+                    <h4><b>Train Name</b></h4>
+                    <p>{str_TrainName}</p>
+                    
+                </span>
+            </div>
+            <div class="sdls-col slds-size_1-of-6 slds-text-align_center">
+                <span>
+                    
+                    <h4><b>From Station</b></h4>
+                    <p>{str_Starting}</p>
+                    
+                </span>
+            </div>
+            <div class="sdls-col slds-size_1-of-6 slds-text-align_center">
+                <span>
+                    <h4><b>Destination Station</b></h4>
+                    <p>{str_Destination}</p>
+                </span>
+            </div>
+            <div class="sdls-col slds-size_2-of-6">
+                <span>
+                    <div class="slds-text-align_center">
+                    <h4><b>Runs on</b></h4>
+                    </div>
+                    <div class="slds-grid slds-wrap">
+                          <template for:each={options} for:item="weekday">
+                          <div class="slds-col slds-box slds-box_x-small slds-text-align_center custom-color" key={weekday.label}>{weekday.value}</div>
+                      </template>
+                    </div>
+                </span>
+            </div>
+        </div>
+    </lightning-card>
+
+    <lightning-card>
+        <lightning-spinner variant="brand" size="small" alternative-text="Loading" if:true={isLoadingData}></lightning-spinner>
+        <table class="slds-table">
+            <thead>
+                <tr>
+                    <template if:true={listLabels} for:each={columns} for:item="column">
+                        <th key={column.fieldName}>{column.label}</th>
+                    </template>
+                </tr>
+           
+            </thead>
+            <tbody>
+                <template for:each={list_scheduleData} for:item="row" for:index="d_index">
+                    
+                    <tr key={row.Id} class="row-body"> 
+                        <td class="data-body">
+                            <a onclick={viewScheduleRecord} name={row.Id}>{d_index}</a>
+                        </td>
+                        <td class="data-body">{row.RMS_To__r.RMS_StationCode__c}</td>
+                        <td class="data-body">{row.RMS_To__r.Name}</td>
+                        <td class="data-body">{row.RMS_RouteNumber__c}</td>
+                        <td class="data-body">
+                            <lightning-formatted-time></lightning-formatted-time>
+                            {row.RMS_ArrivalTimeTo__c}
+                        </td>
+                        <td class="data-body">
+                            <lightning-formatted-time></lightning-formatted-time>
+                            {row.RMS_DepartureTimeTo__c}
+                        </td>
+                        <td class="data-body">{row.RMS_HaltTime__c}</td>
+                        <td class="data-body">{row.RMS_Distance__c}</td>
+                    </tr>
+               
+                </template>
+            </tbody>
+        </table>
+           
+    </lightning-card> 
+</template>

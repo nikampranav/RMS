@@ -1,0 +1,137 @@
+<!--
+* 
+* @ Name    :   RMS_Filter
+* @ Purpose :   This is a component is used for Filtering the data in train
+* @ Author  :   Nikam Pranav
+*
+*   Date            |  Developer Name               |  Version      |  Changes
+* ======================================================================================================
+*   23-01-2024      |  pranav.nikam@absyz.com	    |  1.0          |  Initial Version
+*   12-02-2024      |  pranav.nikam@absyz.com       |  1.1          |  optamized the code in all ways.
+*
+-->
+
+<template>
+<lightning-card>
+<div class="slds-text-heading_small">
+<div class="schedule" style="display: flex; justify-content: space-between; padding-bottom: 10px">
+<span style="padding-left: 30px;"><strong>Refine Result</strong></span>
+<a href="#" style="color: red; padding-right: 30px;" onclick={handleReset}><strong>Reset Filter</strong></a>
+</div>
+</div>
+<br>
+<div style="display: flex; justify-content: space-between; padding-right: 50px;">
+<p style="padding-left: 30px; color:blue"><strong> JOURNER CLASS </strong> </p>
+<div style="display: flex; align-items: center;">
+<button class="slds-botton" style="margin-right: 10px;" onclick={selectAllJourneyClass}>Select All</button>
+<lightning-icon icon-name={iconName1} size="small" onclick={toggleJourneyClassGrid}></lightning-icon>
+</div>
+</div>
+<br>
+
+<div class="checkbox-grid" if:true={bln_isJourneyClassGridVisible}>
+<span style="padding-left: 30px;padding-bottom: 30px;">
+<div class="left-side">
+<template for:each={firstTwoJourneyClassOptions} for:item="option">
+<div key={option.label} class="slds-col"> 
+<lightning-input style="padding-bottom: 20px" type="checkbox" label={option.label} name={option.label} checked={option.isChecked}></lightning-input>
+</div>
+</template>   
+</div>
+</span>
+<span style="padding-right: 30px;">
+<div class="right-side">
+<template for:each={lastTwoJourneyClassOptions} for:item="option">
+<div key={option.label} class="slds-col">
+<lightning-input style="padding-bottom: 20px" type="checkbox" label={option.label} name={option.label} checked={option.isChecked}></lightning-input>
+</div>
+</template>
+</div>
+</span>
+
+</div> 
+<div style="display: flex; justify-content: space-between; padding-right: 50px;">
+<p style="padding-left: 30px; color:blue"><strong> TRAIN TYPE </strong> </p>
+<div style="display: flex; align-items: center;">
+<button class="slds-botton" style="margin-right: 10px;" onclick={selectAllTrainType}>Select All</button>
+<lightning-icon icon-name={iconName2} size="small" onclick={toggleTrainTypeGrid}></lightning-icon>
+</div>
+</div>
+<br> 
+<div class="checkbox-grid" if:true={bln_isTrainTypeGridVisible}>
+<template for:each={str_trainTypeOptions} for:item="option2">
+<div key={option2.label} class="slds-col" style="padding-left: 30px;"> 
+<lightning-input style="padding-bottom: 20px" type="checkbox" label={option2.label} name={option2.label} checked={option2.isChecked}></lightning-input>
+</div>
+</template>   
+</div>
+<div style="display: flex; justify-content: space-between; padding-right: 50px;">
+<p style="padding-left: 30px; color:blue"><strong> DEPARTURE TIME </strong> </p>
+<div style="display: flex; align-items: center;">
+<button class="slds-botton" style="margin-right: 10px;" onclick={selectAllDeparture}>Select All</button>
+<lightning-icon icon-name={iconName3} size="small" onclick={toggleTrainTimeGrid}></lightning-icon>
+</div>
+</div>
+<br> 
+<div class="checkbox-grid" style="justify-content: stretch; gap: 20px; margin: 0 20px;" if:true={bln_isTrainTimeGridVisible}>
+<div style="flex: 1;">
+<button onclick={changeColor} class="RMS departure-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>00.00-06.00<br>Early Morning</strong></button>
+<button onclick={changeColor} class="RMS departure-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>06.00-12.00<br>Morning</strong></button>  
+</div>
+<div style="flex: 1;">
+<button onclick={changeColor} class="RMS departure-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>12.00-18.00<br>Mid-Night</strong></button>
+<button onclick={changeColor} class="RMS departure-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>18.00-24.00<br>Night</strong></button>
+</div>
+<br>
+</div>
+<div class="slds-m-around_medium">
+<lightning-slider
+label="Time"
+min={Int_min}
+max={Int_max}
+step={Int_step}
+value={Int_departureValue}
+variant="label-hidden"
+onchange={handleChangeDeparture}>
+</lightning-slider>
+<div class="slds-grid slds-grid_align-spread">
+<span class="slds-text-title">00:00 Hrs</span>
+<span class="slds-text-title">24:00 Hrs</span>
+</div>
+</div>
+<div style="display: flex; justify-content: space-between; padding-right: 50px;">
+<p style="padding-left: 30px; color:blue"><strong> ARRIVAL TIME </strong> </p>
+<div style="display: flex; align-items: center;">
+<button class="slds-botton" style="margin-right: 10px;" onclick={selectAllArrival}>Select All</button>
+<lightning-icon icon-name={iconName4} size="small" onclick={toggalTrainArrivalGrid}></lightning-icon>
+</div>
+</div>
+<br> 
+<div class="checkbox-grid" style="justify-content: stretch; gap: 20px; margin: 0 20px;" if:true={bln_isTrainArrivalGridVisible}>
+<div style="flex: 1;">
+<button onclick={changeColor} class="RMS arrival-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>00.00-06.00<br>Early Morning</strong></button>
+<button onclick={changeColor} class="RMS arrival-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>06.00-12.00<br>Morning</strong></button>  
+</div>
+<div style="flex: 1;">
+<button onclick={changeColor} class="RMS arrival-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>12.00-18.00<br>Mid-Night</strong></button>
+<button onclick={changeColor} class="RMS arrival-button" style="background-color: rgb(14, 14, 109); margin-bottom: 10px;color: rgb(255, 255, 255);height: 50px;width: 100%;"><strong>18.00-24.00<br>Night</strong></button>
+</div>
+<br>
+</div>
+<div class="slds-m-around_medium">
+<lightning-slider
+label="Time"
+min={Int_min}
+max={Int_max}
+step={Int_step}
+value={Int_arrivalValue}
+variant="label-hidden"
+onchange={handleChangeArrival}>
+</lightning-slider>
+<div class="slds-grid slds-grid_align-spread">
+<span class="slds-text-title">00:00 Hrs</span>
+<span class="slds-text-title">24:00 Hrs</span>
+</div>
+</div>
+</lightning-card>
+</template>

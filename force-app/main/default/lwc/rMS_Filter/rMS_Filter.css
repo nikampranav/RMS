@@ -1,0 +1,9 @@
+.checkbox-grid {
+display: flex;
+justify-content: space-between;
+}
+
+.open .checkbox-grid {
+display: flex;
+justify-content: space-between;
+}

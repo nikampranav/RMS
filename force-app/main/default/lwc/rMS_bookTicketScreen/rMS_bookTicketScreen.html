@@ -1,0 +1,123 @@
+<!--
+* 
+* @ Name    :   RMS_bookTicketScreen
+* @ Purpose :   This is a component for displaying the book ticket screen of our app
+* @ Author  :   Anshika Augustine
+*
+*   Date            |  Developer Name                   |  Version      |  Changes
+* ======================================================================================================
+*   23-01-2024      |  anshika.augustine@absyz.com	    |  1.0          |  Initial Version
+*   24-01-2024      |  anshika.augustine@absyz.com	    |  1.1          |  Added the class and passes 
+*                                                                         component
+*   25-01-2024      |  anshika.augustine@absyz.com	    |  1.2          |  Added the checkboxes as well 
+*                                                                          as the buttons(search, cancel)
+*   1-02-2024       |  anshika.augustine@absyz.com      |  1.3          |  Added lightning navigation to
+*                                                                           the js
+
+-->
+<template>
+<article class="slds-card">
+  <div class="slds-border_bottom">
+  <div class="schedule" style="display: flex; color:rgb(108, 108, 228);">
+  <div class="slds-card__header slds-grid slds-align_absolute-center">
+    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+      <div class="slds-media__body">
+        <h2 class="slds-card__header-title" style="justify-content: center;font-size:large">
+          <a href="#" class="slds-card__header-link slds-truncate" title="BOOK TICKET"> 
+            <span>BOOK TICKET</span><br><br>
+          </a>
+        </h2>
+      </div>
+    </header> 
+  </div>
+</div>
+</div> 
+  <div class="slds-card__body">
+    <div class="slds-var-m-around_medium">
+      <div class=" slds-grid slds-gutters">
+        <div class="slds-col">
+          <span>
+              <div class="slds-text-heading_x-small">From</div>
+              <c-rms-child-custom-lookup
+                            icon-name="utility:jump_to_top"
+                            s-object-api-name="RMS_Station__c"
+                            onlookupupdate={lookupRecord}
+                            record-name="strFromStation"
+                            placeholder="Place..."
+                            onchange={handleSearchFrom}>
+                          </c-rms-child-custom-lookup>
+          </span>
+        </div>
+        <div class="slds-col">
+          <span>
+            <div class="slds-text-heading_x-small" >To</div>
+            <c-rms-child-custom-lookup
+                          icon-name="utility:jump_to_top"
+                          s-object-api-name="RMS_Station__c"
+                          onlookupupdate={lookupRecord}
+                          record-name="strToStation"
+                          placeholder="Place..."
+                          onchange={handleSearchTo}>
+                        </c-rms-child-custom-lookup>
+          </span>
+        </div>
+      </div>
+      <div class="slds-grid slds-gutters">
+        <div class="slds-col slds-size_6-of-12" >
+          <span>
+          <lightning-input
+                type="date"
+                label="Date"
+                value={selectedDate}
+                min={currentDate}
+                onchange={handleDateChange}
+                placeholder="Select a Date"
+            ></lightning-input>
+          </span>
+        </div>
+        <div class="slds-col slds-size_6-of-12">
+          <span>
+              <lightning-combobox
+                  label="All Classes"
+                  value={coachValue}
+                  options={classOptions}
+                  onchange={handleCoach}
+                  placeholder="Select class"
+              ></lightning-combobox> 
+            </span>
+        </div>
+        </div>
+        <div class="slds-col slds-size_6-of-12">
+            <lightning-combobox
+                  label="Passes"
+                  value={passValue}
+                  options={passOptions}
+                  onchange={handlePass}
+                  placeholder="Select a pass"
+              ></lightning-combobox>
+            </div> 
+              <br><br> 
+              <div class="checkbox-grid" style="padding-left: 40px;">
+                <template for:each={checkboxOptions} for:item="option">
+                    <div key={option.label} class="slds-col">
+                        <lightning-input type="checkbox" label={option.label} name={option.label} checked={option.isChecked}></lightning-input>
+                    </div>
+                </template>
+            </div>
+    </div>
+    
+  </div>
+  <footer class="slds-card__footer slds-grid" style="background-color: rgb(228, 235, 235);"> 
+    <lightning-button class="slds-col_bump-left" 
+                      style="padding-right: 20px;"
+                      label="Cancel" 
+                      onclick={handleCancel}>
+                    </lightning-button>
+    <lightning-button 
+                      label="Search" 
+                      variant = "Brand"
+                      onclick={handleSearch}>
+                    </lightning-button>
+  </footer>
+</article>
+</template>

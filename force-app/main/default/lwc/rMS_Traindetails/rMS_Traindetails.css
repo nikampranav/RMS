@@ -1,0 +1,103 @@
+.schedule {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.time-place, .duration {
+    margin: 0 2px;
+}
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.header > * {
+    margin: 0 5px;
+}
+.date-container {
+    display: flex;
+    justify-content: space-between;
+}
+.container {
+    margin: 10px;
+    width: 30%;
+  }
+  /* Add this block to your CSS file */
+.coach-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    gap: 5px;
+}
+
+.date-block-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center; /* Adjust as needed */
+}
+
+
+
+.capacity {
+    color: white; /* White text for better visibility on green background */
+}
+
+
+
+
+.date {
+    font-weight: bold;
+}
+
+.capacity {
+    margin-top: 5px;
+}
+.date-block {
+    border: 2px solid #e2e2e6;
+    padding: 10px;
+    width: 125px; /* Adjust width as needed */
+    text-align: center;
+    background-color: #ffffff;
+    margin-bottom: 5px;
+    border-radius: 8px; /* Add a slight curve */
+    height: 30; /* Set the desired height */
+}
+
+.date-block-container {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto; /* Enable horizontal scrolling if needed */
+}
+
+
+
+
+.date {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Example of an external CSS file */
+.main-card {
+   
+    /* You can add other card styles here if needed */
+}
+
+.inner-container {
+    
+    padding-right: 10px;
+   
+    padding-left: 10px;
+    
+}
+.blue-background {
+    background-color: rgba(192, 205, 226, 0.834);
+}
+
+
+.date-block.selected-coach {
+    background-color: #aee5ff; /* Update with your desired background color for the selected coach */
+    color: #000000; /* Update with your desired text color for the selected coach */
+}
