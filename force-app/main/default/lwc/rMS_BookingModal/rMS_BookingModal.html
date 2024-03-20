@@ -1,0 +1,28 @@
+<template>
+    <lightning-modal-header label="Passenger Details"></lightning-modal-header>
+    <lightning-modal-body>
+    <lightning-card title="Passenger Details" icon-name="standard:contact">
+        <div class="slds-m-around_medium">
+            <lightning-input label
+            ="Full Name" value={name} onchange={handleNameChange}></lightning-input>
+            <lightning-input type="number" label="Age" value={age}></lightning-input>
+            <lightning-radio-group label="Gender"
+                options={genderOptions}
+                value={gender}
+                type="button">
+            </lightning-radio-group>
+            <lightning-input label="Number of Passengers" value={passengers} onchange={handlePassengerChange}></lightning-input>
+
+        </div>
+        <div class="slds-m-around_medium">
+            <p>Selected Coach: {options.coach}</p>
+            <p>Distance: {options.distance}</p>
+        </div>
+        <footer class="slds-modal__footer">
+                <p>Ticket Price: {ticketPrice}</p> 
+            <button class="slds-button slds-button_neutral" style="background-color: rgb(14, 14, 109); color: #ffffff;" onclick={handlePreviousClick}>...Previous</button>
+            <button class="slds-button slds-button_brand" style="background-color: rgb(14, 14, 109); color: #ffffff;" onclick={handleYesClick}>Book</button>
+        </footer>
+    </lightning-card>
+    </lightning-modal-body>
+</template>

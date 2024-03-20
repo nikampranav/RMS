@@ -48,7 +48,7 @@ global class RMS_TrainScheduleGeneratorBatch implements Database.Batchable<SObje
             List<RMS_Coach__c> List_newCoaches = new List<RMS_Coach__c>();
             List<Id> List_scheduleIdsToDelete = new List<Id>();
             
-            List<String> coachesList = new List<String>{'General(GEN)', 'Sleeper(SL)', 'AC Executive Class(EC)', 'AC Chair Car(CC)', 'AC 3 Tire(3A)', 'AC First Class(1A)','AC 2 Tire(2A)'};
+            List<String> coachesList = new List<String>{'General(GEN)', 'Sleeper(SL)', 'AC Executive Class(EC)','AC Chair Car(CC)','AC 2 Tire(2A)'};
                 
             // Iterate over each existing schedule to create new schedules and coaches
             for (RMS_TrainSchedule__c existingSchedule : List_trainSchedule) {

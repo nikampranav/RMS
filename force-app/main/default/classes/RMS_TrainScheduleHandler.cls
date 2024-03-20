@@ -88,11 +88,17 @@ public with sharing class RMS_TrainScheduleHandler {
    public static list<RMS_TrainSchedule__c> returnSchedule(string str_recordId,string str_fromStation,string str_toStation,string str_date){
     try {
             integer int_day,int_month;
-            boolean bool_firstItr=true;
+            boolean bool_flag=false;
+            String str_updated=str_fromStation;
             Date date_journeyDate = Date.valueOf(str_date);
-            system.debug(date_journeyDate);
+            RMS_TrainSchedule__c tempVar = [SELECT RMS_BaseSchedule__r.RMS_From__r.Name
+            FROM RMS_TrainSchedule__c
+            WHERE RMS_Date__c=:date_journeyDate 
+            AND RMS_Train__c =: str_recordId
+            AND RMS_From__r.Name=:str_updated
+            LIMIT 1];
 
-
+            system.debug(tempVar.RMS_From__c);
             List<RMS_TrainSchedule__c> list_TrainSchedules= [SELECT
                 RMS_ArrivalTimeTo__c,
                 RMS_DepartureTimeTo__c,
@@ -105,14 +111,27 @@ public with sharing class RMS_TrainScheduleHandler {
                 RMS_To__r.Name,
                 RMS_Train__r.Name,
                 RMS_Train__r.RMS_TrainNo__c,
-                RMS_Train__r.RMS_Weekday__c
+                RMS_Train__r.RMS_Weekday__c,
+                RMS_IsReturn__c
                 FROM RMS_TrainSchedule__c
                 WHERE RMS_Train__c =: str_recordId
                 AND RMS_Date__c=:date_journeyDate
                 AND RMS_From__r.Name=:str_fromStation
-                ORDER BY RMS_ArrivalTimeTo__c ASC, RMS_DepartureTimeTo__c ASC
+                ORDER BY RMS_Distance__c ASC
+                // RMS_ArrivalTimeTo__c ASC, RMS_DepartureTimeTo__c ASC
             ];
+            // for(RMS_TrainSchedule__c obj:list_TrainSchedules){
+            //     if (obj.RMS_IsReturn__c == true){
+            //         bool_flag = true;
+            //     }
+            // }
 
+            // if(bool_flag){
+            //     for(integer i = list_TrainSchedules.size()-1;i>=0;i--){
+            //             reversedList.add(list_TrainSchedules[i]);
+            //     }
+            //     return reversedList;
+            // }
             // String str_route=String.valueOf(list_TrainSchedules[0].RMS_RouteNumber__c);
             // List<String> list_StationCodes = new List<String>();
             

@@ -101,6 +101,7 @@ export default class RMS_BookTicketScreen extends NavigationMixin(LightningEleme
 //Handles the navigation from screen 1 to the next screen
 handleSearch() {  
   if (this.strFromStation && this.strToStation && this.selectedDate && this.coachValue) {
+    console.log(this.strFromStation,'========',this.strToStation);
   // Navigate to the search result page
       this[NavigationMixin.Navigate]({
           type: 'standard__navItemPage',

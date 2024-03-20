@@ -17,7 +17,7 @@
 */
 
 trigger RMS_BookingTrigger on RMS_Booking__c (before insert, after update) {
-    RMS_SwitchTrigger ST = RMS_SwitchTrigger.getValue('Deactivate');
+    RMS_SwitchTrigger ST = RMS_SwitchTrigger.getValue('Activate');
     if(ST.BlnActive == True){
         if(trigger.isUpdate)
             RMS_BookingHandler.decCalculatePricePerKm(trigger.New,True);

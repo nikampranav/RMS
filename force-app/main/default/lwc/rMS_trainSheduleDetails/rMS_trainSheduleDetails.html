@@ -76,7 +76,7 @@
                     
                     <tr key={row.Id} class="row-body"> 
                         <td class="data-body">
-                            <a onclick={viewScheduleRecord} name={row.Id}>{d_index}</a>
+                            <a onclick={viewScheduleRecord} name={row.Id}>{row.RMS_Index__c}</a>
                         </td>
                         <td class="data-body">{row.RMS_To__r.RMS_StationCode__c}</td>
                         <td class="data-body">{row.RMS_To__r.Name}</td>

@@ -22,7 +22,7 @@ str_recordId;    /*to be passed from previous component */
 @track date_trainScheule;
 @track url_trainRecord='/'+this.str_recordId;
 @track url_scheduleRecord;
-list_TrainDetails=[];
+list_TrainDetails=[];   
 isLoadingData=true
 isLoadingHeader=true
 bool_first
@@ -76,11 +76,6 @@ getPageReferenceParameters(currentPageReference){
         }
     }
         
-    
-    
-
-
-
 @wire(returnSchedule, { str_recordId: '$str_recordId',str_fromStation:'$str_Starting',str_toStation:'$str_Destination',str_date:'$date_trainScheule'})
 wiredTrainSchedule({ error, data }) {
     if (data) {
@@ -99,12 +94,15 @@ wiredTrainSchedule({ error, data }) {
             this.options.push({value:option,label:option});
         })
 
-
+        let i=0;
         this.list_scheduleData = data.map((item) => {
+                i+=1;
                 return {
                     ...item,
                     RMS_ArrivalTimeTo__c: item.RMS_ArrivalTimeTo__c ? this.convertTime(item.RMS_ArrivalTimeTo__c) : '_',
                     RMS_DepartureTimeTo__c: item.RMS_DepartureTimeTo__c ? this.convertTime(item.RMS_DepartureTimeTo__c) : '_',
+                    RMS_HaltTime__c: item.RMS_HaltTime__c ? item.RMS_HaltTime__c: '0',
+                    RMS_Index__c: i
                 }
         })
         console.log(this.list_scheduleData);
