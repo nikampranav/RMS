@@ -1,0 +1,49 @@
+<template>
+    <div class="slds-size_3-of-4">
+    <!-- <lightning-modal if:true={showModal} onclose={handleModalClose}> -->
+    <lightning-modal-body if:true={showModal}>
+    <lightning-card title="Passenger Details" icon-name="standard:contact">
+        <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+        <div class="slds-m-around_small">
+            <lightning-input label="Full Name" onchange={handleNameChange} required></lightning-input>
+              
+            <lightning-card >
+                    <div class="slds-m-bottom_xx-small"><label for="ageInput">Age</label>
+                    </div>
+                    <input
+                        id="ageInput"
+                        type="number"
+                        max="123"   
+                        min="18"
+                        value={age}
+                        style={customStyle}
+                        onchange={handleAgeChange}
+            
+                    ></input>
+            </lightning-card>
+            
+            <lightning-radio-group label="Gender"
+                options={genderOptions}
+                value={gender}
+                type="button">
+            </lightning-radio-group>
+            <lightning-input type="number" label="Number of Passengers" onchange={handlePassengerChange}></lightning-input>
+        
+           
+        </div>
+        <div class="slds-m-around_medium">
+            <p>Selected Coach: {options.coach}</p>
+            <p>Distance: {options.distance}</p>
+        </div>
+    
+        <footer class="slds-modal__footer">
+            <p style="display: inline-block; font-size: xx-large; font-weight: bold; margin-right: 30px;">₹ {ticketPrice}</p>
+            <button class="slds-button slds-button_neutral" style="background-color: rgb(14, 14, 109); color: #ffffff;" onclick={handlePreviousClick}>Cancel</button>
+            
+            <button class="slds-button slds-button_brand" style="background-color: rgb(14, 14, 109); color: #ffffff;" onclick={handleBookingClick}>{buttonLabel}.</button>
+        </footer>
+    </lightning-card>
+    </lightning-modal-body>
+<!-- </lightning-modal> -->
+</div>
+</template>

@@ -1,7 +1,6 @@
 import { LightningElement,track,api, wire } from 'lwc';
 import returnSchedule from '@salesforce/apex/RMS_TrainScheduleHandler.returnSchedule';
 import getFieldLabels from '@salesforce/apex/RMS_TrainScheduleHandler.getFieldLabels';
-import returnTrainDetails from '@salesforce/apex/RMS_TrainScheduleHandler.returnTrainDetails';
 import { NavigationMixin } from 'lightning/navigation';
 import {CurrentPageReference} from 'lightning/navigation';
 
@@ -22,7 +21,7 @@ str_recordId;    /*to be passed from previous component */
 @track date_trainScheule;
 @track url_trainRecord='/'+this.str_recordId;
 @track url_scheduleRecord;
-list_TrainDetails=[];
+list_TrainDetails=[];   
 isLoadingData=true
 isLoadingHeader=true
 bool_first
@@ -76,11 +75,6 @@ getPageReferenceParameters(currentPageReference){
         }
     }
         
-    
-    
-
-
-
 @wire(returnSchedule, { str_recordId: '$str_recordId',str_fromStation:'$str_Starting',str_toStation:'$str_Destination',str_date:'$date_trainScheule'})
 wiredTrainSchedule({ error, data }) {
     if (data) {
@@ -99,12 +93,15 @@ wiredTrainSchedule({ error, data }) {
             this.options.push({value:option,label:option});
         })
 
-
+        let i=0;
         this.list_scheduleData = data.map((item) => {
+                i+=1;
                 return {
                     ...item,
                     RMS_ArrivalTimeTo__c: item.RMS_ArrivalTimeTo__c ? this.convertTime(item.RMS_ArrivalTimeTo__c) : '_',
                     RMS_DepartureTimeTo__c: item.RMS_DepartureTimeTo__c ? this.convertTime(item.RMS_DepartureTimeTo__c) : '_',
+                    RMS_HaltTime__c: item.RMS_HaltTime__c ? item.RMS_HaltTime__c: '0',
+                    RMS_Index__c: i
                 }
         })
         console.log(this.list_scheduleData);
@@ -127,26 +124,6 @@ convertTime(int_duration) {
 }
 
 connectedCallback(){
-    // returnTrainDetails({ str_recordId:this.str_recordId })
-    // .then((result)=>{
-    //     this.list_TrainDetails=result;
-    //     this.list_TrainDetails.forEach(item=>{
-    //         this.str_TrainName=item.Name;
-    //         this.str_TrainNumber=item.RMS_TrainNo__c;
-    //         this.str_Starting=item.RMS_Starting__c;
-    //         this.str_Destination=item.RMS_Destination__c;
-    //         const str_array=item.RMS_Weekday__c.split("|"); 
-    //         this.options=str_array.map(weekday=>{
-    //             return{
-    //                 label:weekday,
-    //                 value:weekday
-    //             }
-    //         })
-    //     })
-    //     })
-    // .catch((error)=>{
-    //     console.log('Error Retrieving Train Details ',error);
-    // })
     this.bool_first=true
     getFieldLabels()
     .then((result)=>{

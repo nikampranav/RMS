@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
 import List_getTrainDetails from '@salesforce/apex/RMS_TrainController.List_getTrainDetails';
-import getAvailableSeats from '@salesforce/apex/RMS_CapacityController.getAvailableSeats';
 import getAvailableDates from '@salesforce/apex/RMS_CapacityController.getAvailableDates';
 import getTrainSchedules from'@salesforce/apex/RMS_MyJourneyController.getTrainSchedules';
 import { CurrentPageReference,NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import BookingModal from 'c/rMS_BookingModal'
+import { subscribe, MessageContext, unsubscribe,APPLICATION_SCOPE } from 'lightning/messageService';
+import filter_Channel from '@salesforce/messageChannel/RMS_Message_Channel__c';
 
 import LightningConfirm from 'lightning/confirm';
 
@@ -30,13 +32,23 @@ export default class RMS_Traindetail extends NavigationMixin(LightningElement) {
     @track strFromSch = '';
     @track strToSch = '';
     @track selectedCoach = '';
+    @track coachValue;
     @track datesWithCapacity = [];
     @track showModal = false;
     @track showModalBackdrop = false;
     @track seats = {};
     @track rms_coaches = [];
+    @track distance;
+    @track ticketPrice;
     seats;
     RMS_Coach;
+    journeyClassOptions = [];
+    availableCoaches = [];
+    isVisible = true; 
+    subscription=null;
+    
+    @wire(MessageContext)
+    messageContext;
 
     get capacityValue() {
         console.log('capacity available => ',)
@@ -50,7 +62,7 @@ export default class RMS_Traindetail extends NavigationMixin(LightningElement) {
     }
 
 
-
+ 
 /* wire function property to fetch search record based on user input*/
 @wire(List_getTrainDetails, { trainName: '$nameOfTrain' })
 wiredTrain({ error, data }) {
@@ -67,10 +79,19 @@ int_coachName: item
 }
 }); 
 
+
 console.log('coaches value =>>> '+this.str_Coaches)
 
 this.int_AvailableSeats = data.RMS_Available_Seats__c;
 this.str_error = undefined;
+
+this.subscription = subscribe(
+    this.messageContext,
+    filter_Channel,
+    (message) => {
+        this.handleMessage(message);
+    }
+);
 } else if (error) {
 console.log('error=>' +JSON.stringify(error));
 this.str_error = error;
@@ -79,6 +100,117 @@ this.str_Coaches = undefined;
 this.int_AvailableSeats = undefined;
 }
 }
+
+handleMessage(message){
+    console.log("In Handle Message");
+        //console.log("message", message);
+        this.filterMessage=message;
+        if (message && message.journeyClassOptions) {
+              
+                 console.log('Received journeyClassOptions:', message.journeyClassOptions);
+        
+                       this.journeyClassOptions = JSON.parse(message.journeyClassOptions); // Convert JSON string to object
+        
+        
+                   // Get train details based on the train name
+                     if (this.str_trainName && this.str_Coaches) {
+                        // Log train name and coaches
+                       console.log('Train name:', this.str_trainName);
+                       console.log('Coaches:', JSON.stringify(this.str_Coaches));
+        
+
+                        // Check if any selected journey class option is not available in the available coaches
+                        const lastOption = this.journeyClassOptions.slice().reverse().find(option => option.label === 'All Classes' && option.isChecked);
+                        // Check if any selected journey class option is not available in the available coaches
+                         if (this.journeyClassOptions.some(option => {
+                            if(option.isChecked){
+                                return this.str_Coaches.includes(option.label);
+                            }
+                            return false;
+                         }) || lastOption){
+                            this.isVisible = true;
+                        } else {
+                            this.isVisible = false;
+                        }
+                    } else {
+                         console.log('Train details are not yet available.');
+                    }
+               
+                 } else if (message && message.departureTimeOptions) {
+                    console.log('Received departureTimeOptions:', message.departureTimeOptions);
+            
+                    // Get the arrival and departure times from the train schedule
+                    
+                    const departureTime = this.journey.map(item => item.RMS_DepartureTimeFrom__c);
+                    console.log('Train departure time:',departureTime);
+                    // Extract the time range from the clicked button
+                    const clickedButtonTimeRange = message.departureTimeOptions;
+                     // Extract start and end times from the clicked button time range
+                    const startBlock = clickedButtonTimeRange.split('-')[0]; // Extracting '18.00'
+                    const endBlock = clickedButtonTimeRange.split('-')[1].replace(/[^0-9]/g, ''); // Extracting '24'
+
+                   // Log the formatted departureTimeOptions
+                    console.log('Formatted departureTimeOptions:', startBlock, endBlock);
+                    
+            
+                    // Check if the clicked button time range matches the arrival or departure time
+                    const isWithindepartureRange = departureTime.some(departureTime => {
+                        const [hours, minutes] = departureTime.split(':').map(Number); // Convert hours and minutes to numbers
+                        const departureNumerical = hours * 100 + minutes; // Convert departure time to numerical value
+                    
+                        // Convert start and end times to numerical values for comparison
+                        const startNumerical = parseInt(startBlock.replace('.', ''));
+                        const endNumerical = parseInt(endBlock);
+                    
+                    
+                        // Check if the departure time falls within the range
+                        const result = departureNumerical >= startNumerical && departureNumerical <= endNumerical;
+                        console.log('Result:', result);
+                        return result;
+                    });
+                    
+                    // Set isVisible based on whether any departure time falls within the range
+                    console.log('Is within range:', isWithindepartureRange);
+                    this.isVisible = isWithindepartureRange;
+                } else if (message && message.arrivalTimeOptions) {
+                    console.log('Received arrivalTimeOptions:', message.arrivalTimeOptions);
+            
+                    // Get the arrival and departure times from the train schedule
+                    
+                    const arrivalTime = this.journey.map(item => item.RMS_ArrivalTimeTo__c);
+                    console.log('Train arrival time:',arrivalTime);
+                    // Extract the time range from the clicked button
+                    const clickedButtonTimeRanges = message.arrivalTimeOptions;
+                     // Extract start and end times from the clicked button time range
+                    const startBlock = clickedButtonTimeRanges.split('-')[0]; 
+                    const endBlock = clickedButtonTimeRanges.split('-')[1].replace(/[^0-9]/g, ''); 
+
+                   // Log the formatted departureTimeOptions
+                    console.log('Formatted arrivalTimeOptions:', startBlock, endBlock);
+            
+                    // Check if the clicked button time range matches the arrival or departure time
+                    const isWithinArrivalRange = arrivalTime.some(arrivalTime => {
+                        const [hours, minutes] = arrivalTime.split(':').map(Number); // Convert hours and minutes to numbers
+                        const arrivalNumerical = hours * 100 + minutes; // Convert arrivaltime to numerical value
+                    
+                        // Convert start and end times to numerical values for comparison
+                        const startNumerical = parseInt(startBlock.replace('.', ''));
+                        const endNumerical = parseInt(endBlock);
+                    
+                        // Check if the departure time falls within the range
+                        const result = arrivalNumerical >= startNumerical && arrivalNumerical <= endNumerical;
+                        console.log('Result:', result);
+                        return result;
+                    });
+                    
+                    // Set isVisible based on whether any departure time falls within the range
+                    console.log('Is within range:', isWithinArrivalRange);
+                    this.isVisible = isWithinArrivalRange;
+                }
+
+                 console.log("After handling");
+                 console.log("isvisble check",this.isVisible);
+    } 
 
 handleTabChange(event) {
     this.activeTab = event.target.label;
@@ -140,6 +272,7 @@ console.log('The train is currently not in service.');
 }
 
 navigateSchedulePage(){
+    console.log('Inside Button Trigger '+ this.strFromStation + this.strToStation)
 if(this.strFromStation && this.strToStation && this.selectedDate && this.str_trainId)
 {
     this[NavigationMixin.Navigate]({
@@ -147,8 +280,8 @@ if(this.strFromStation && this.strToStation && this.selectedDate && this.str_tra
         attributes: {
             apiName:"RMS_TrainScheduleDetails",
             state: {
-            RMS_fromStation: this.strFromSch,
-            RMS_ToStation: this.strToSch,
+            RMS_fromStation: this.strFromStation,
+            RMS_ToStation: this.strToStation,
             RMS_Date: this.selectedDate,
             RMS_trainId: this.str_trainId,
             
@@ -287,7 +420,39 @@ return dates;
 }
 
 
+    // Handle the received message containing journey class options
+    // async handleMessage(message) {
+    //     if (message && message.journeyClassOptions) {
+    //         console.log('Received journeyClassOptions:', message.journeyClassOptions);
 
+    //         this.journeyClassOptions = JSON.parse(message.journeyClassOptions); // Convert JSON string to object
+          
+    
+    //         // Get train details based on the train name
+    //         if (this.str_trainName && this.str_Coaches) {
+    //             // Log train name and coaches
+    //             console.log('Train name:', this.str_trainName);
+    //             console.log('Coaches:', this.str_Coaches);
+    
+    //             // Check if any selected journey class option is not available in the available coaches
+    //             if (this.journeyClassOptions.some(option => !this.str_Coaches.includes(option.label))) {
+    //                 this.isVisible = false;
+    //             } else {
+    //                 this.isVisible = true;
+    //             }
+    //         } else {
+    //             console.log('Train details are not yet available.');
+    //         }
+        
+    //     }
+    // }
+
+    
+
+    // Unsubscribe from the message channel when the component is disconnected
+    disconnectedCallback() {
+        unsubscribe(this.subscription);
+    }
 
 
 
@@ -300,54 +465,144 @@ if (event.target.classList.contains('date-block')) {
     event.target.classList.toggle('blue-background');
 }
 }
-
-async handleConfirmClick() {
-    const result = await LightningConfirm.open({
-        message: `You searched trains for Date ${this.selectedDate}  from ${this.strFromStation} to ${this.strToStation} and the train is ${this.str_trainName},also the coach is ${this.coachValue} Do you want to continue with it?`,
-        variant: 'header',
-        label: 'Confirmation',
-        theme: 'info'
-    });
-
-
-    if(result) {
-        // Show a success toast message
-        const event = new ShowToastEvent({
-            title: 'Success!',
-            message: 'Thank you for booking.',
-            variant: 'success',
-        });
-        this.dispatchEvent(event);
+openNewRecord() {
+    // Check if required data is available
+    if (this.str_trainName && this.strFromStation && this.strToStation && this.selectedDate) {
+        // Create a formatted message
+        this.formattedMessage =  `You searched trains for Date ${this.selectedDate}  from ${this.strFromStation} to ${this.strToStation} and the train is ${this.str_trainName},
+                                   Also the coach is ${this.selectedCoach} Do you want to continue with it?`;
+        this.showModal = true;
+        this.showModalBackdrop = true;
     } else {
-        const event = new ShowToastEvent({
-        title: 'Cancelled',
-        message: 'Booking process cancelled.',
-        variant: 'error',
-        });
-        this.dispatchEvent(event);
+        console.error('Not all required values are available.');
     }
 }
 
+closeModal() {
+    // Set showModal to false to hide the modal
+    this.showModal = false;
+    this.showModalBackdrop = false;
+}
+async handleYesClick() {
+
+    const bookingDetails = {
+       
+        coach: this.selectedCoach, // Pass the selected coach
+        distance: this.distance,    // Pass the distance
+        sch_id:this.trainScheduleId // Pass the ScheduleId
+    };
+    
+    
+    console.log('Booking Details:', bookingDetails);
+
+    console.log('journeyDate',this.selectedDate);
+
+
+    await getTrainSchedules({fromStation: this.strFromStation, toStation: this.strToStation, journeyDate: this.selectedDate})
+    .then(result => {
+
+        console.log('result: ',result)
+        if (result && result.length > 0) {
+            console.log('result',result)
+        
+            bookingDetails.distance = result[0].RMS_Distance__c;
+        }   
+    })
+    .catch(error => {
+        console.error('Error fetching train schedules:', error);
+    });
+
+    const res = await BookingModal.open({
+        size: 'Medium',
+        heading: 'Navigate to Record Page',
+        description: 'Navigate to a record page by clicking the row button',
+        options: bookingDetails  
+    })
+    this.closeModal()
+    if(res) {
+        console.log("Clicked ok")
+    }
+
+
+    // Implement your logic here for handling "Yes" click
+    console.log('User clicked "Yes". Implement your logic here.');
+   
+
+}
+
+handleNoClick() {
+    // Implement your logic here for handling "No" click
+    console.log('User clicked "No". Implement your logic here.');
+
+    // Show a cancellation toast message
+    const event = new ShowToastEvent({
+        title: 'Cancelled',
+        message: 'Booking process cancelled.',
+        variant: 'error',
+    });
+    this.dispatchEvent(event);
+
+    // Close the modal
+    this.closeModal();
+}
+// async handleConfirmClick() {
+//     const result = await LightningConfirm.open({
+//         message: `You searched trains for Date ${this.selectedDate}  from ${this.strFromStation} to ${this.strToStation} and the train is ${this.str_trainName},also the coach is ${this.coachValue} Do you want to continue with it?`,
+//         variant: 'header',
+//         label: 'Confirmation',
+//         theme: 'info'
+//     });
+
+
+//     if(result) {
+//         // Open new modal upon confirmation
+//         this.showBookingModal = true;
+//     } else {
+//         // Handle cancellation
+//         const event = new ShowToastEvent({
+//             title: 'Cancelled',
+//             message: 'Booking process cancelled.',
+//             variant: 'error',
+//             });
+//             this.dispatchEvent(event);
+//     }
+
+
+//     if(result) {
+//         // Show a success toast message
+//         const event = new ShowToastEvent({
+//             title: 'Success!',
+//             message: 'Thank you for booking.',
+//             variant: 'success',
+//         });
+//         this.dispatchEvent(event);
+//     } else {
+//         const event = new ShowToastEvent({
+//         title: 'Cancelled',
+//         message: 'Booking process cancelled.',
+//         variant: 'error',
+//         });
+//         this.dispatchEvent(event);
+//     }
+// }
+
+showBookingModal = false;
+selectedGender = '';
+genderOptions = [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' }
+];
+
+// New methods for the booking modal
+handleCancel() {
+    this.showBookingModal = false;
+}
+
+handleBook() {
+    // Handle the booking process here
+}
+
 
 
 
 }
-
-// AND Id IN (SELECT Train_Schedule__c FROM RMS_Coach__c)
-
-// class="main-card" padding="around-medium"
-
-//AND Id IN (SELECT Train_Schedule__c FROM RMS_Coach__c)
-//AND RMS_Date__c!= null
-
-
-
-// List<Date> distinctScheduledDates = new List<Date>();
-// for (AggregateResult ar : [SELECT MIN(RMS_ScheduledDate__c) minDate FROM RMS_Coach__c WHERE Train_Schedule__c = :trainScheduleId GROUP BY Train_Schedule__c]) {
-//     distinctScheduledDates.add((Date)ar.get('minDate'));
-// }
-
-
-
-
-//AND Name IN :coachCapacityMap.keySet()

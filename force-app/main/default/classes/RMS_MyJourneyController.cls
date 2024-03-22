@@ -63,6 +63,7 @@ public with sharing class RMS_MyJourneyController {
                 RMS_ArrivalTimeTo__c,
                 RMS_ArrivalTimeFrom__c, 
                 RMS_DepartureTimeFrom__c,
+                RMS_Distance__c,
                 RMS_Date__c
                 FROM RMS_TrainSchedule__c 
                 WHERE RMS_From__r.Name = :fromStation 

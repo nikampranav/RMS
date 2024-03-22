@@ -88,10 +88,41 @@ public with sharing class RMS_TrainScheduleHandler {
    public static list<RMS_TrainSchedule__c> returnSchedule(string str_recordId,string str_fromStation,string str_toStation,string str_date){
     try {
             integer int_day,int_month;
-            boolean bool_firstItr=true;
+            boolean bool_flag=false;
+            String str_updated=str_fromStation;
             Date date_journeyDate = Date.valueOf(str_date);
+            List<RMS_TrainSchedule__c> newList = new List<RMS_TrainSchedule__c>();
             system.debug(date_journeyDate);
 
+            List<RMS_TrainSchedule__c> tempVar = [SELECT RMS_BaseSchedule__c,RMS_BaseSchedule__r.RMS_From__c
+            FROM RMS_TrainSchedule__c
+            WHERE RMS_Date__c=:date_journeyDate
+            AND RMS_Train__c =: str_recordId
+            AND RMS_BaseSchedule__c!=NULL 
+            LIMIT 1];
+
+            system.debug(tempVar);
+            String str_baseId = tempVar[0].RMS_BaseSchedule__c ;
+            String str_baseFromId = tempVar[0].RMS_BaseSchedule__r.RMS_From__c;
+            system.debug(str_baseFromId+str_baseId);
+
+            RMS_TrainSchedule__c firstEntry = [SELECT
+            RMS_ArrivalTimeTo__c,
+            RMS_DepartureTimeTo__c,
+            RMS_HaltTime__c,
+            RMS_DepartureTime__c,
+            RMS_RouteNumber__c,
+            RMS_To__r.RMS_StationCode__c,
+            RMS_Distance__c,
+            RMS_From__r.Name,
+            RMS_To__r.Name,
+            RMS_Train__r.Name,
+            RMS_Train__r.RMS_TrainNo__c,
+            RMS_Train__r.RMS_Weekday__c
+            FROM RMS_TrainSchedule__c
+            WHERE Id=:str_baseId ];
+
+            newList.add(firstEntry);
 
             List<RMS_TrainSchedule__c> list_TrainSchedules= [SELECT
                 RMS_ArrivalTimeTo__c,
@@ -107,69 +138,13 @@ public with sharing class RMS_TrainScheduleHandler {
                 RMS_Train__r.RMS_TrainNo__c,
                 RMS_Train__r.RMS_Weekday__c
                 FROM RMS_TrainSchedule__c
-                WHERE RMS_Train__c =: str_recordId
-                AND RMS_Date__c=:date_journeyDate
-                AND RMS_From__r.Name=:str_fromStation
-                ORDER BY RMS_ArrivalTimeTo__c ASC, RMS_DepartureTimeTo__c ASC
+                WHERE RMS_BaseSchedule__c = :str_baseId
+                AND RMS_From__c=:str_baseFromId
+                ORDER BY RMS_Distance__c ASC 
             ];
-
-            // String str_route=String.valueOf(list_TrainSchedules[0].RMS_RouteNumber__c);
-            // List<String> list_StationCodes = new List<String>();
+            newList.addAll(list_TrainSchedules);
             
-
-            // RMS_Route__c obj_TrainRoute = [SELECT RMS_StationsCovered__c FROM RMS_Route__c WHERE Name =:str_route LIMIT 1]; 
-
-            // list_StationCodes = obj_TrainRoute.RMS_StationsCovered__c.split(',');
-            // System.debug('Codes: ' + list_StationCodes);
-
-            // Set<string> set_ToStations = new Set<string>();
-            // List<RMS_TrainSchedule__c> list_UpdatedTrainSchedule = new List<RMS_TrainSchedule__c>();
-
-            // for(integer i=0;i+1<list_TrainSchedules.size();i++){
-            //     if (list_TrainSchedules[i].RMS_From__r.Name == list_TrainSchedules[i+1].RMS_From__r.Name){
-            //         list_TrainSchedules.remove(i);
-            //     }
-                
-            // }
-
-            // for(RMS_TrainSchedule__c obj:list_TrainSchedules) {
-            //         if(list_StationCodes.contains(obj.RMS_To__r.RMS_StationCode__c)){
-            //             list_UpdatedTrainSchedule.add(obj);
-            //             System.debug(obj);
-            //         }
-            // }
-
-            // for(RMS_TrainSchedule__c obj:s){
-            //     system.debug('Data after filtering: '+s);
-            // }
-
-            // return list_UpdatedTrainSchedule;
-            // List<RMS_TrainSchedule__c> s =list_TrainSchedules;
-            // integer i;
-        //     for(i=0; i+1<s.size()-1;i++){
-               
-        //         if(s[i].RMS_To__r.Name==s[i+1].RMS_To__r.Name){
-        //             s.remove(i);
-        //         }
-        //         if(s[i].RMS_DepartureTimeTo__c == null){ 
-        //             if(s[i].RMS_ArrivalTimeTo__c<s[i+1].RMS_ArrivalTimeTo__c){
-        //                     s.remove(i);                                                                                                                                    
-        //                 }
-        //                 if(s[i].RMS_ArrivalTimeTo__c!=null && i==0){
-        //                     s.remove(i);
-        //             }
-        //         }
-               
-        // }
-        // s.remove(i);
-
-        
-        // if(s[i-1].RMS_To__r.Name != str_toStation){
-        //     s.remove(i-1);
-        // }
-           
-            
-            return list_TrainSchedules;
+            return newList;
             
     } catch (Exception e) {
         throw new AuraHandledException(e.getMessage());
