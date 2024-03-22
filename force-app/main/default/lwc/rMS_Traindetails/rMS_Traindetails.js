@@ -120,12 +120,14 @@ handleMessage(message){
         
 
                         // Check if any selected journey class option is not available in the available coaches
+                        const lastOption = this.journeyClassOptions.slice().reverse().find(option => option.label === 'All Classes' && option.isChecked);
+                        // Check if any selected journey class option is not available in the available coaches
                          if (this.journeyClassOptions.some(option => {
                             if(option.isChecked){
                                 return this.str_Coaches.includes(option.label);
                             }
                             return false;
-                         } )){
+                         }) || lastOption){
                             this.isVisible = true;
                         } else {
                             this.isVisible = false;
@@ -134,7 +136,78 @@ handleMessage(message){
                          console.log('Train details are not yet available.');
                     }
                
-                 }
+                 } else if (message && message.departureTimeOptions) {
+                    console.log('Received departureTimeOptions:', message.departureTimeOptions);
+            
+                    // Get the arrival and departure times from the train schedule
+                    
+                    const departureTime = this.journey.map(item => item.RMS_DepartureTimeFrom__c);
+                    console.log('Train departure time:',departureTime);
+                    // Extract the time range from the clicked button
+                    const clickedButtonTimeRange = message.departureTimeOptions;
+                     // Extract start and end times from the clicked button time range
+                    const startBlock = clickedButtonTimeRange.split('-')[0]; // Extracting '18.00'
+                    const endBlock = clickedButtonTimeRange.split('-')[1].replace(/[^0-9]/g, ''); // Extracting '24'
+
+                   // Log the formatted departureTimeOptions
+                    console.log('Formatted departureTimeOptions:', startBlock, endBlock);
+                    
+            
+                    // Check if the clicked button time range matches the arrival or departure time
+                    const isWithindepartureRange = departureTime.some(departureTime => {
+                        const [hours, minutes] = departureTime.split(':').map(Number); // Convert hours and minutes to numbers
+                        const departureNumerical = hours * 100 + minutes; // Convert departure time to numerical value
+                    
+                        // Convert start and end times to numerical values for comparison
+                        const startNumerical = parseInt(startBlock.replace('.', ''));
+                        const endNumerical = parseInt(endBlock);
+                    
+                    
+                        // Check if the departure time falls within the range
+                        const result = departureNumerical >= startNumerical && departureNumerical <= endNumerical;
+                        console.log('Result:', result);
+                        return result;
+                    });
+                    
+                    // Set isVisible based on whether any departure time falls within the range
+                    console.log('Is within range:', isWithindepartureRange);
+                    this.isVisible = isWithindepartureRange;
+                } else if (message && message.arrivalTimeOptions) {
+                    console.log('Received arrivalTimeOptions:', message.arrivalTimeOptions);
+            
+                    // Get the arrival and departure times from the train schedule
+                    
+                    const arrivalTime = this.journey.map(item => item.RMS_ArrivalTimeTo__c);
+                    console.log('Train arrival time:',arrivalTime);
+                    // Extract the time range from the clicked button
+                    const clickedButtonTimeRanges = message.arrivalTimeOptions;
+                     // Extract start and end times from the clicked button time range
+                    const startBlock = clickedButtonTimeRanges.split('-')[0]; 
+                    const endBlock = clickedButtonTimeRanges.split('-')[1].replace(/[^0-9]/g, ''); 
+
+                   // Log the formatted departureTimeOptions
+                    console.log('Formatted arrivalTimeOptions:', startBlock, endBlock);
+            
+                    // Check if the clicked button time range matches the arrival or departure time
+                    const isWithinArrivalRange = arrivalTime.some(arrivalTime => {
+                        const [hours, minutes] = arrivalTime.split(':').map(Number); // Convert hours and minutes to numbers
+                        const arrivalNumerical = hours * 100 + minutes; // Convert arrivaltime to numerical value
+                    
+                        // Convert start and end times to numerical values for comparison
+                        const startNumerical = parseInt(startBlock.replace('.', ''));
+                        const endNumerical = parseInt(endBlock);
+                    
+                        // Check if the departure time falls within the range
+                        const result = arrivalNumerical >= startNumerical && arrivalNumerical <= endNumerical;
+                        console.log('Result:', result);
+                        return result;
+                    });
+                    
+                    // Set isVisible based on whether any departure time falls within the range
+                    console.log('Is within range:', isWithinArrivalRange);
+                    this.isVisible = isWithinArrivalRange;
+                }
+
                  console.log("After handling");
                  console.log("isvisble check",this.isVisible);
     } 
@@ -416,7 +489,7 @@ async handleYesClick() {
        
         coach: this.selectedCoach, // Pass the selected coach
         distance: this.distance,    // Pass the distance
-        sch_id:this.trainScheduleId
+        sch_id:this.trainScheduleId // Pass the ScheduleId
     };
     
     
@@ -433,19 +506,19 @@ async handleYesClick() {
             console.log('result',result)
         
             bookingDetails.distance = result[0].RMS_Distance__c;
-        }
+        }   
     })
     .catch(error => {
         console.error('Error fetching train schedules:', error);
     });
 
     const res = await BookingModal.open({
-        size: 'medium',
+        size: 'Medium',
         heading: 'Navigate to Record Page',
         description: 'Navigate to a record page by clicking the row button',
         options: bookingDetails  
     })
-
+    this.closeModal()
     if(res) {
         console.log("Clicked ok")
     }

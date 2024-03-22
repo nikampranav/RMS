@@ -1,7 +1,6 @@
 import { LightningElement,track,api, wire } from 'lwc';
 import returnSchedule from '@salesforce/apex/RMS_TrainScheduleHandler.returnSchedule';
 import getFieldLabels from '@salesforce/apex/RMS_TrainScheduleHandler.getFieldLabels';
-import returnTrainDetails from '@salesforce/apex/RMS_TrainScheduleHandler.returnTrainDetails';
 import { NavigationMixin } from 'lightning/navigation';
 import {CurrentPageReference} from 'lightning/navigation';
 
@@ -125,26 +124,6 @@ convertTime(int_duration) {
 }
 
 connectedCallback(){
-    // returnTrainDetails({ str_recordId:this.str_recordId })
-    // .then((result)=>{
-    //     this.list_TrainDetails=result;
-    //     this.list_TrainDetails.forEach(item=>{
-    //         this.str_TrainName=item.Name;
-    //         this.str_TrainNumber=item.RMS_TrainNo__c;
-    //         this.str_Starting=item.RMS_Starting__c;
-    //         this.str_Destination=item.RMS_Destination__c;
-    //         const str_array=item.RMS_Weekday__c.split("|"); 
-    //         this.options=str_array.map(weekday=>{
-    //             return{
-    //                 label:weekday,
-    //                 value:weekday
-    //             }
-    //         })
-    //     })
-    //     })
-    // .catch((error)=>{
-    //     console.log('Error Retrieving Train Details ',error);
-    // })
     this.bool_first=true
     getFieldLabels()
     .then((result)=>{

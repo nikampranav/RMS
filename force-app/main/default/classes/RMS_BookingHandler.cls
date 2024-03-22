@@ -14,7 +14,56 @@
 
 public class RMS_BookingHandler {
 
-   @AuraEnabled
+@AuraEnabled
+public static Decimal getDistancePrice(Integer Distance){
+list<RMS_DistancePricing__mdt> list_pricingList = [
+                SELECT 
+                MasterLabel,
+                Map_Coach_Price__c, 
+                Map_Pricing__c,
+                Map_MaxDistance__c,
+                Map_MinDistance__c 
+                FROM 
+                RMS_DistancePricing__mdt ];
+    for(Integer i=0;i<list_pricingList.size();i++){
+    if (list_pricingList[i].Map_MaxDistance__c > Distance && list_pricingList[i].Map_MinDistance__c < Distance){
+                       return (Decimal) list_pricingList[i].Map_Pricing__c;
+                    }
+    
+    }
+    return Null;
+}
+
+@AuraEnabled
+public static Map<String,Decimal> getMappedRate(){
+ list<RMS_DistancePricing__mdt> list_pricingList = [
+                SELECT 
+                MasterLabel,
+                Map_Coach_Price__c, 
+                Map_Pricing__c,
+                Map_MaxDistance__c,
+                Map_MinDistance__c 
+                FROM 
+                RMS_DistancePricing__mdt ];
+            system.debug('list_pricingList'+list_pricingList);
+            map<String,Decimal> map_CoachPrice = new map<String,Decimal>();
+            for (RMS_DistancePricing__mdt pricing : list_pricingList) {
+                map_CoachPrice.put(pricing.MasterLabel, (Decimal) pricing.Map_Coach_Price__c);
+            }
+
+            return map_CoachPrice;
+}
+
+@AuraEnabled
+public static Decimal getTicketPrice(Id recId){
+    Decimal ticketPrice;
+    RMS_Booking__c bookLast = [SELECT RMS_Ticket_Price__c FROM RMS_Booking__c WHERE Id=:recId];
+    ticketPrice = bookLast.RMS_Ticket_Price__c*1.00;
+    system.debug(ticketPrice);
+    return ticketPrice;
+}
+
+@AuraEnabled
 public static Id createBookingRecord(String coach, Integer distance, Integer passengers, String FullName, String sch_Id) {
     // Perform record insertion here using the provided parameters
     String ret_Id;
@@ -23,8 +72,8 @@ public static Id createBookingRecord(String coach, Integer distance, Integer pas
     system.debug(FullName+' is the Full_Name');
     RMS_Booking__c newBooking = new RMS_Booking__c();
     newBooking.Full_Name__c = FullName;
-    newBooking.RMS_COACH__c = coach;
-    newBooking.RMS_DISTANCE__c = distance;
+    newBooking.RMS_Coach__c = coach;
+    newBooking.RMS_Distance__c = distance;
     newBooking.RMS_No_of_Passenger__c = passengers;
     newBooking.Train_Schedule__c = sch_Id;
     try {
@@ -38,21 +87,17 @@ public static Id createBookingRecord(String coach, Integer distance, Integer pas
 }
 
 
-
+    
     public static boolean blnisExecuting = False;
     
     
     /* 
     * @ author       :  Nikam Pranav
     * @ description  :  The decCalculatePricePerKm method is used to calculate the price per kilometer based on 
-    *                   the distance of the journey.    
+    *                   the distance of the journey.
     */
-
-    @AuraEnabled(cacheable=true)
-    public static Integer decCalculatePricePerKm(list<RMS_Booking__c> list_NewBooking,Boolean blnisUpdateFlag) {
-        Integer intTotalPrice=0;
-
-        system.debug('list_NewBooking' +list_NewBooking);
+    
+    public static void decCalculatePricePerKm(list<RMS_Booking__c> list_NewBooking,Boolean blnisUpdateFlag) {
         if(!blnisExecuting){
             blnisExecuting=True;
             
@@ -86,6 +131,7 @@ public static Id createBookingRecord(String coach, Integer distance, Integer pas
                 Integer intDistancePrice = map_BookingPricing.get(bookingObj.Id);
                 String strCoach = bookingObj.RMS_COACH__c;
                 Integer intCoachPrice = map_CoachPrice.get(strCoach);
+                Integer intTotalPrice=0;
                 if(intCoachPrice != null && intDistancePrice != null && bookingObj.RMS_No_of_Passenger__c != null) {
                     intTotalPrice=(intCoachPrice+intDistancePrice)*bookingObj.RMS_No_of_Passenger__c.intValue();
                 } else {
@@ -110,7 +156,5 @@ public static Id createBookingRecord(String coach, Integer distance, Integer pas
             
         }
         blnisExecuting=False;
-
-        return intTotalPrice;
     }
 }
