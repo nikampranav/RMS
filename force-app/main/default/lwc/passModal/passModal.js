@@ -1,35 +1,31 @@
-import { LightningElement,track,api, wire } from 'lwc';
+import LightningModal from 'lightning/modal';
+import {track,api, wire } from 'lwc';
 import returnSchedule from '@salesforce/apex/RMS_TrainScheduleHandler.returnSchedule';
 import getFieldLabels from '@salesforce/apex/RMS_TrainScheduleHandler.getFieldLabels';
 import { NavigationMixin } from 'lightning/navigation';
-import {CurrentPageReference} from 'lightning/navigation';
 
-export default class RMS_trainScheduleDetails extends NavigationMixin(LightningElement) {
+export default class PassModal extends LightningModal {
+    @api values={};
+    @track rowOffset=0;
+    @track recordId;
+    @track tableData = [];
+    @track listLabels=[];
+    @track list_API=[];
+    @track list_scheduleData=[];  
+    @track columns=[];
+    @track str_TrainName;
+    @track str_TrainNumber;
+    strLabelHeader='';
+    @track str_Starting;
+    @track str_Destination;
+    str_recordId;    /*to be passed from previous component */
+    @track date_trainScheule;
+    list_TrainDetails=[];   
+    isLoadingData=true
+    isLoadingHeader=true
+    bool_first
 
-@track rowOffset=0;
-@track recordId;
-@track tableData = [];
-@track listLabels=[];
-@track list_API=[];
-@track list_scheduleData=[];  
-@track columns=[];
-@track str_TrainName;
-@track str_TrainNumber;
-@track str_Starting;
-@track str_Destination;
-str_recordId;    /*to be passed from previous component */
-@track date_trainScheule;
-@track url_trainRecord='/'+this.str_recordId;
-@track url_scheduleRecord;
-list_TrainDetails=[];   
-isLoadingData=true
-isLoadingHeader=true
-bool_first
-
-FieldLabels = {};
-options=[];
- 
-/* Method to Navigate to Train Schedule Record Page */
+    /* Method to Navigate to Train Schedule Record Page */
 viewScheduleRecord(event){
     this[NavigationMixin.GenerateUrl]({
         type: 'standard__recordPage',
@@ -43,7 +39,6 @@ viewScheduleRecord(event){
     })
 }
 
-/* Method to Navigate to Train Record Page */
 viewTrainRecord(){
     this[NavigationMixin.GenerateUrl]({
         type: 'standard__recordPage',
@@ -57,24 +52,6 @@ viewTrainRecord(){
     })
 }
 
-@wire(CurrentPageReference)
-getPageReferenceParameters(currentPageReference){
-   
-        try{
-            if(currentPageReference){
-        let state = currentPageReference.attributes.state;
-        console.log('state Sch: ',JSON.stringify(currentPageReference.attributes.state));
-        this.str_Starting = state ? state.RMS_fromStation : '';
-        this.str_Destination = state ? state.RMS_ToStation : '';
-        this.date_trainScheule = state ? state.RMS_Date : '';
-        this.str_recordId = state ? state.RMS_trainId : '' ;
-            }
-        }
-        catch(e){
-            console.log('Error with CurrentPageReference: ',e);
-        }
-    }
-        
 @wire(returnSchedule, { str_recordId: '$str_recordId',str_fromStation:'$str_Starting',str_toStation:'$str_Destination',str_date:'$date_trainScheule'})
 wiredTrainSchedule({ error, data }) {
     if (data) {
@@ -123,10 +100,23 @@ convertTime(int_duration) {
     return hours + ":" + minutes + ' ' + unit;
 }
 
-connectedCallback(){
-    console.log('URL:',window.location.href);
-    this.bool_first=true
-    getFieldLabels()
+
+    connectedCallback(){
+        console.log('Values are',this.values);
+        this.str_Starting = this.values.RMS_fromStation;
+        this.str_Destination = this.values.RMS_ToStation;
+        this.date_trainScheule = this.values.RMS_Date;
+        this.str_recordId = this.values.RMS_trainId;
+        this.strLabelHeader = this.values.RMS_TrainName+ ' Schedule';
+        if (this.str_Destination && this.str_Starting && this.date_trainScheule && this.str_recordId){
+            console.log('All Values Fetched')
+
+        }
+        else{
+            console.log('Not all Values Fetched')
+        }
+        
+        getFieldLabels()
     .then((result)=>{
         this.FieldLabels = JSON.parse(JSON.stringify(result));
         this.listLabels=Object.keys(this.FieldLabels);
@@ -146,5 +136,17 @@ connectedCallback(){
     .catch((error)=>{
         console.log('Retrieving Field and Labels Failed!'+ error);
     })   
-}
+    }
+
+    renderedCallback(){
+       // super.renderedCallback()
+        this.applyAnimation()
+    }
+
+    applyAnimation(){
+        const modalWrapper = this.template.querySelector('.modal-wrapper');
+        if(modalWrapper){
+            modalWrapper.classList.add('animate-fade-in')
+        }
+    }
 }

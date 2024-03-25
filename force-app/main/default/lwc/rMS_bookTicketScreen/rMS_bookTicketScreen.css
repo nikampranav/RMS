@@ -15,3 +15,16 @@
 .slds-col {
     margin-bottom: 1rem; /* Adjust margin as needed */
 }
+
+.animation-fade-out{
+  animation: fadeOut 0.6s ease-in-out;
+}
+
+@keyframes fadeOut{
+  from{
+    opacity: 1;
+  }
+  to{
+    opacity: 0;
+  }
+}
