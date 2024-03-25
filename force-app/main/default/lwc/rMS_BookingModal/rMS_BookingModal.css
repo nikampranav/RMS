@@ -1,0 +1,24 @@
+.slds-col{
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+:host ::slotted(label) {
+    font-weight: normal;
+}
+.modal-wrapper{
+    opacity: 1;
+}
+.animation-fade-in{
+    animation: fadeIn 0.6s ease-in;
+
+}
+
+@keyframes fadeIn{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}

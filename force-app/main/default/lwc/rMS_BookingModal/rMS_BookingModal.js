@@ -7,8 +7,10 @@ import getTicketPrice from '@salesforce/apex/RMS_BookingHandler.getTicketPrice';
 import getMappedRate from '@salesforce/apex/RMS_BookingHandler.getMappedRate';
 import getDistancePrice from '@salesforce/apex/RMS_BookingHandler.getDistancePrice';
 
+
 export default class BookingModal extends LightningModal {
     @track FullName = '';
+    @track Gmail= '';
     @track age = 18;
     @track gender = '';
     @track seat = '';
@@ -17,12 +19,13 @@ export default class BookingModal extends LightningModal {
     @track showModal = true;
     bookingDetails;
     @track ticketPrice = 0.00;
-    @track passengers = ''; 
+    @track passengers = 0; 
     @track showTicketPrice=false;
     @api options = {}
     @track boolPriceLoading=false;
     @track coachPrice=0;
     @track distancePrice=0;
+    @track boolGender = false;
     mappedRate={};
     isLoading = false;
     buttonLabel = 'Book';
@@ -37,12 +40,12 @@ export default class BookingModal extends LightningModal {
     }
 
     get customStyle() {
-        return 'height: 30px; font-size: 16px; --webkit-inner-spin-button-opacity: 1';
+        return 'height: 20px; font-size: 12px; font-family: Arial, sans-seriff ; --webkit-inner-spin-button-opacity: 1';
     }
     
     connectedCallback() {
        this.coachVal = this.options.coach;
-
+        
        getDistancePrice({Distance: this.options.distance})
        .then(result=>{
            this.distancePrice = result;
@@ -69,12 +72,15 @@ export default class BookingModal extends LightningModal {
         return [
             { label: 'Male', value: 'male' },
             { label: 'Female', value: 'female' },
+            { label:'Other',  value:'other'}
         ];
     }
    
   
 
-
+    handleGender(){
+        this.boolGender = true;
+    }
     handleModalClose() {
         this.close('success')
         this.showModal = false;
@@ -83,7 +89,7 @@ export default class BookingModal extends LightningModal {
     handlePreviousClick() {
         // Implement your logic here for handling "No" click
         console.log('User clicked "No". Implement your logic here.');
-    
+        this.showToast('Booking Cancelled','','error');
         this.close();
     }
     handlePassengerChange(event) {
@@ -94,18 +100,30 @@ export default class BookingModal extends LightningModal {
     handleNameChange(event){
         this.FullName = event.target.value;
     }
-    
+    handleGmailChange(event){
+        this.Gmail = event.target.value
+    }
+    renderedCallback(){
+        this.applyAnimation()
+    }
 
+    applyAnimation(){
+        const modalBody = this.template.querySelector('.modal-wrapper');
+        if(modalBody){
+            console.log('Applying Animation')
+            modalBody.classList.add('animation-fade-in')
+        }
+    }
     handleBookingClick() {
         this.isLoading = true;
         console.log('Book button clicked');
         
         console.log('Booking Details:', this.options.coach, this.options.distance, this.passengers);
-        if (this.options.coach && this.options.distance && this.passengers) {
+        if (this.options.coach && this.options.distance && this.passengers!=0 && this.boolGender) {
             this.createBooking(); // Calling the createBooking method
         } else {
             this.isLoading = false;
-            this.showToast('Error','Please input all Values','error')
+            this.showToast('Error','Please Check all Values','error')
             console.log('One or more parameters are null');
         }
         

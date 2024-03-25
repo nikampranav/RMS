@@ -70,7 +70,7 @@ public with sharing class RMS_MyJourneyController {
                 AND RMS_To__r.Name = :toStation 
                 AND RMS_Date__c = :DjourneyDate 
                 AND RMS_Date__c!= null
-                AND Id IN (SELECT Train_Schedule__c FROM RMS_Coach__c)
+               // AND Id IN (SELECT Train_Schedule__c FROM RMS_Coach__c)
                 
                
         ];

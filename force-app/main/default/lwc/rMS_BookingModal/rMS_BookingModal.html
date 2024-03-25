@@ -1,15 +1,15 @@
 <template>
     <div class="slds-size_3-of-4">
-    <!-- <lightning-modal if:true={showModal} onclose={handleModalClose}> -->
+        <div class="modal-wrapper">
     <lightning-modal-body if:true={showModal}>
     <lightning-card title="Passenger Details" icon-name="standard:contact">
         <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
         <div class="slds-m-around_small">
             <lightning-input label="Full Name" onchange={handleNameChange} required></lightning-input>
-              
-            <lightning-card >
-                    <div class="slds-m-bottom_xx-small"><label for="ageInput">Age</label>
-                    </div>
+            <div class="slds-grid slds-gutters">
+
+                <div class="slds-col">
+                    <label for="ageInput">Age  </label>
                     <input
                         id="ageInput"
                         type="number"
@@ -18,18 +18,24 @@
                         value={age}
                         style={customStyle}
                         onchange={handleAgeChange}
-            
                     ></input>
-            </lightning-card>
+                </div>
+                <div class="slds-col">
+                    <label>Passengers  </label>
+            <input type="number" min="0" max="6" style={customStyle} value={passengers} onchange={handlePassengerChange}></input>
+
+                </div>
+        </div>
             
             <lightning-radio-group label="Gender"
                 options={genderOptions}
                 value={gender}
-                type="button">
+                type="button"
+                onchange={handleGender}>
             </lightning-radio-group>
-            <lightning-input type="number" label="Number of Passengers" onchange={handlePassengerChange}></lightning-input>
-        
-           
+
+            <lightning-input type="email" label="Email" pattern=".+@gmail.com" message-when-pattern-mismatch="Please enter a valid Gmail address" required onchange={handleGmailChange}></lightning-input>
+ 
         </div>
         <div class="slds-m-around_medium">
             <p>Selected Coach: {options.coach}</p>
@@ -44,6 +50,6 @@
         </footer>
     </lightning-card>
     </lightning-modal-body>
-<!-- </lightning-modal> -->
+    </div>
 </div>
 </template>

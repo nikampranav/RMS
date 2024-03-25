@@ -1,6 +1,7 @@
 import { LightningElement, track, wire } from 'lwc';
 import listGetMetadataValues from '@salesforce/apex/RMS_CustomMetadataController.listGetMetadataValues';
 import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class RMS_BookTicketScreen extends NavigationMixin(LightningElement) {
 
       data = [];
@@ -97,10 +98,7 @@ export default class RMS_BookTicketScreen extends NavigationMixin(LightningEleme
         this.checkboxOptions[index].isChecked = event.target.checked;
     }
 }
-
-//Handles the navigation from screen 1 to the next screen
-handleSearch() {  
-  if (this.strFromStation && this.strToStation && this.selectedDate && this.coachValue) {
+navigateTrainDetails(){
     console.log(this.strFromStation,'========',this.strToStation);
   // Navigate to the search result page
       this[NavigationMixin.Navigate]({
@@ -115,10 +113,18 @@ handleSearch() {
               }   
           }
       });
-  } else {
-      const errorMessage = 'Please fill in all the required fields.';
-      this.showNotification('Error', errorMessage, 'error', 'sticky');       
+}
+//Handles the navigation from screen 1 to the next screen
+handleSearch() {
+  if (this.strFromStation && this.strToStation && this.selectedDate && this.coachValue){
+  this.applyAnimation()
+  //setTimeout(this.navigateTrainDetails(),6000);
   }
+  else{
+    const errorMessage = 'Please fill in all the required fields.';
+      this.showNotification('Error', errorMessage, 'error', 'sticky');   
+  }
+ 
 }
 
 // Reset the input values or any other state you want to clear
@@ -142,5 +148,14 @@ this.dispatchEvent(
       mode: mode
   })
 );
+}
+
+applyAnimation(){
+  const article = this.template.querySelector('.slds-card')
+  if(article){
+    article.classList.add('animation-fade-out');
+  }
+  setTimeout(()=>this.navigateTrainDetails(),350)
+  
 }
 }

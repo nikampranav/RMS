@@ -14,6 +14,7 @@
 <template>
     
     <div class="slds-backdrop" if:true={showModalBackdrop}></div>
+    <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
     <template for:each={journey} for:item="journeyItem">
         <lightning-card key={journeyItem.Id} class="main-card" if:true={isVisible} >
             <div class="inner-container">
@@ -29,6 +30,7 @@
                         class="slds-m-left_small" 
                         >
                     </lightning-icon>
+                   
                             <div class="slds-text-heading_medium"><strong>{journeyItem.RMS_Train__r.Name}</strong></div>
                         </h1>
                         <h2 slot="title" style="display: flex;align-items: center;gap:10px;">

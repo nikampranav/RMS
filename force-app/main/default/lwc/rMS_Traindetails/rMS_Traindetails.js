@@ -7,10 +7,11 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import BookingModal from 'c/rMS_BookingModal'
 import { subscribe, MessageContext, unsubscribe,APPLICATION_SCOPE } from 'lightning/messageService';
 import filter_Channel from '@salesforce/messageChannel/RMS_Message_Channel__c';
-
+import PassModal from 'c/passModal';
 import LightningConfirm from 'lightning/confirm';
 
 export default class RMS_Traindetail extends NavigationMixin(LightningElement) {
+    @track isLoading = true; 
     @track dates = [];
     @track journey = [];
     @track str_TrainName;
@@ -249,15 +250,18 @@ updateDatesWithCapacity() {
         this.datesWithCapacity = this.dates.map(date => {
             const coach = coachInfo.coaches.find(coach => coach.RMS_ScheduledDate__c === date);
             return { date, capacity: coach ? coach.RMS_Capacity__c : 0 };
+              
         });
-
+        
         console.log('Dates with Capacity:', this.datesWithCapacity);
+        this.isLoading = false;
 
         // Rerender the component to reflect the changes
         // this.template.querySelector('iter').rerender();
     } else {
         this.datesWithCapacity = [];
         console.log('Coach Info not found. Dates with Capacity:', this.datesWithCapacity);
+        this.isLoading = false;
     }
 }
 
@@ -272,22 +276,38 @@ console.log('The train is currently not in service.');
 }
 
 navigateSchedulePage(){
+    
     console.log('Inside Button Trigger '+ this.strFromStation + this.strToStation)
 if(this.strFromStation && this.strToStation && this.selectedDate && this.str_trainId)
 {
-    this[NavigationMixin.Navigate]({
-        type: 'standard__navItemPage',
-        attributes: {
-            apiName:"RMS_TrainScheduleDetails",
-            state: {
-            RMS_fromStation: this.strFromStation,
-            RMS_ToStation: this.strToStation,
-            RMS_Date: this.selectedDate,
-            RMS_trainId: this.str_trainId,
+    const value = {
+        RMS_fromStation: this.strFromStation,
+        RMS_ToStation: this.strToStation,
+        RMS_Date: this.selectedDate,
+        RMS_trainId: this.str_trainId,
+        RMS_TrainName: this.nameOfTrain
+    }
+    PassModal.open({
+        size:'medium',
+        label:'Hey There',
+        values:value
+    })
+    .catch((error)=>{
+        console.log('Error is',JSON.stringify(error))
+    })
+    // this[NavigationMixin.Navigate]({
+    //     type: 'standard__navItemPage',
+    //     attributes: {
+    //         apiName:"RMS_TrainScheduleDetails",
+    //         state: {
+    //         RMS_fromStation: this.strFromStation,
+    //         RMS_ToStation: this.strToStation,
+    //         RMS_Date: this.selectedDate,
+    //         RMS_trainId: this.str_trainId,
             
-            }   
-        }
-    });
+    //         }   
+    //     }
+    // });
 }
 else{
     console.log('Not all values populated from Navigation Mixing')
@@ -323,6 +343,7 @@ if (data) {
 console.log("Data: wiredourney", data);
 this.nameOfTrain = data[0].RMS_Train__r.Name
 this.trainScheduleId = data[0].Id;
+this.isLoading = false;
 
 console.log('data . ',data[0].Id);
 this.journey = data.map(item => ({
@@ -330,10 +351,12 @@ this.journey = data.map(item => ({
     RMS_DepartureTimeFrom__c: this.formatTime(item.RMS_DepartureTimeFrom__c),
     RMS_ArrivalTimeTo__c: this.formatTime(item.RMS_ArrivalTimeTo__c),
     
+    
 }));
 console.log('Journey: ', JSON.parse(JSON.stringify(this.journey)));
 } else if (error) {
 console.error("An error occurred while fetching train schedules: ", (error));
+this.isLoading = true;
 }
 }
 
@@ -359,6 +382,7 @@ return formattedTime
 
 get seatInfo() {
     let seatInfo = [];
+    
 
     seatInfo = this.seats?.map((item) => {
         return {
